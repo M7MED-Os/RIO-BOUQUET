@@ -1,0 +1,33 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-cairo), ui-sans-serif, system-ui, sans-serif;
+  --color-rose-50: #fff1f2;
+  --color-rose-100: #ffe4e6;
+  --color-rose-500: #f43f5e;
+  --color-rose-600: #e11d48;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: #fffbfc;
+  color: #1a1a2e;
+}
+
+@media print {
+  @page {
+    margin: 0; /* Removes browser headers and footers */
+    size: A4 portrait;
+  }
+  body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    background-color: white !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+}
