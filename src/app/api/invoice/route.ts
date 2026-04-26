@@ -74,7 +74,7 @@ export async function GET(request: Request) {
     const shortId = order.id.split('-')[0].toUpperCase()
 
     // 5. Return PDF Response
-    return new NextResponse(pdfBuffer, {
+    return new NextResponse(pdfBuffer as any, {
       status: 200,
       headers: {
         'Content-Type': 'application/pdf',
