@@ -149,7 +149,7 @@ export default function CheckoutBox({ product }: { product: Product }) {
       <div className="space-y-3 pt-4 border-t border-rose-100 mt-6">
         <button 
           onClick={handleOrder} 
-          disabled={loading || (product.price && (!customerName.trim() || !customerAddress.trim()))}
+          disabled={loading || !!(product.price && (!customerName.trim() || !customerAddress.trim()))}
           className="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-rose-600 h-14 text-lg font-bold text-white transition hover:bg-rose-700 hover:-translate-y-0.5 shadow-lg shadow-rose-200 disabled:opacity-50 disabled:hover:translate-y-0"
         >
           {loading ? 'جاري التحضير...' : 'تأكيد الطلب وإصدار الفاتورة'}
