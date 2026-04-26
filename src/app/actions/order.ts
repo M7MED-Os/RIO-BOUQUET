@@ -9,7 +9,9 @@ export async function createOrder(
   couponCode: string, 
   currentDiscount: number,
   customerName: string,
-  customerAddress: string
+  customerAddress: string,
+  customerPhone: string,
+  paymentMethod: string
 ) {
   const supabase = await createClient()
   let finalPrice = product.price || 0
@@ -55,7 +57,9 @@ export async function createOrder(
     discount_percentage: discount,
     final_price: finalPrice,
     customer_name: customerName,
-    customer_address: customerAddress
+    customer_address: customerAddress,
+    customer_phone: customerPhone,
+    payment_method: paymentMethod
   }).select().single()
 
   if (error || !order) {

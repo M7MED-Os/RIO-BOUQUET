@@ -36,10 +36,13 @@ export async function GET(request: Request) {
     productDescription = words.slice(0, 5).join(' ') + (words.length > 5 ? '...' : '')
   }
 
-  // 3. Generate HTML Template
-  const html = generateInvoiceHTML(order, productDescription)
+  // 3. Fetch Settings
+  const { data: settings } = await supabase.from('store_settings').select('*').single()
 
-  // 4. Generate PDF using Puppeteer
+  // 4. Generate HTML Template
+  const html = generateInvoiceHTML(order, productDescription, settings || { cod_enabled: true, cod_deposit_required: false })
+
+  // 5. Generate PDF using Puppeteer
   let browser
   try {
     if (process.env.NODE_ENV === 'production') {
@@ -86,7 +89,7 @@ export async function GET(request: Request) {
 
     const shortId = order.id.split('-')[0].toUpperCase()
 
-    // 5. Return PDF Response
+    // 6. Return PDF Response
     return new NextResponse(pdfBuffer as any, {
       status: 200,
       headers: {

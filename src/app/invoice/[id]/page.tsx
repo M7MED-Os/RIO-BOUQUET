@@ -23,6 +23,15 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
 
   if (!order) notFound()
 
+  const { data: settings } = await supabase
+    .from('store_settings')
+    .select('*')
+    .single()
+
+  const codDepositRequired = settings?.cod_deposit_required || false;
+  const depositPercentage = settings?.deposit_percentage || 50;
+  const depositAmount = (order.final_price * depositPercentage) / 100;
+
   const shortId = order.id.split('-')[0].toUpperCase()
 
   return (
@@ -102,11 +111,25 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
               </div>
 
               {/* Payment Instruction Reminder */}
-              <div className="mb-6 p-4 bg-rose-50 border border-rose-100 rounded-2xl">
-                <p className="text-rose-600 font-bold text-sm leading-relaxed text-center">
-                  لإتمام الطلب يرجى تنزيل الفاتوره و ارسالها على الواتس مع ايصال/اسكرين الدفع عشان نبدأ نجهز طلبك فورا
-                </p>
-              </div>
+              {order.payment_method === 'الدفع عند الاستلام' && !codDepositRequired ? (
+                <div className="mb-6 p-4 bg-green-50 border border-green-100 rounded-2xl">
+                  <p className="text-green-700 font-bold text-sm leading-relaxed text-center">
+                    سيتم تجهيز طلبك قريباً. الدفع سيكون عند استلام الطلب. يرجى إرسال هذه الفاتورة على الواتساب لتأكيد طلبك
+                  </p>
+                </div>
+              ) : order.payment_method === 'الدفع عند الاستلام' && codDepositRequired ? (
+                <div className="mb-6 p-4 bg-rose-50 border border-rose-100 rounded-2xl">
+                  <p className="text-rose-600 font-bold text-sm leading-relaxed text-center">
+                    يرجى دفع مقدم بنسبة {depositPercentage}% ({Number(depositAmount).toFixed(2)} ج.م) عبر طرق الدفع الموضحة بالأسفل لتأكيد الحجز والبدء في تجهيز طلبك. يرجى إرسال الفاتورة مع إيصال الدفع على الواتساب
+                  </p>
+                </div>
+              ) : (
+                <div className="mb-6 p-4 bg-rose-50 border border-rose-100 rounded-2xl">
+                  <p className="text-rose-600 font-bold text-sm leading-relaxed text-center">
+                    لإتمام الطلب يرجى دفع إجمالي المبلغ وإرسال إيصال الدفع (سكرين شوت) مع هذه الفاتورة على الواتساب للبدء في تجهيز طلبك فوراً
+                  </p>
+                </div>
+              )}
 
               {/* Order Details */}
               <h3 className="text-lg font-bold text-zinc-900 mb-4 border-b border-zinc-100 pb-2">تفاصيل الطلب</h3>
@@ -151,6 +174,15 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
                   </div>
                 </div>
               </div>
+              {/* Store Policies */}
+              {settings?.policies && (
+                <div className="mt-8 rounded-2xl bg-zinc-50 border border-zinc-200 p-6 no-print">
+                  <h3 className="text-sm font-black text-zinc-900 mb-3">سياسات المتجر:</h3>
+                  <p className="text-sm text-zinc-600 leading-relaxed whitespace-pre-line font-medium">
+                    {settings.policies}
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -1,9 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Product } from '@/types/product'
 import { createClient } from '@/lib/supabase/client'
-import { ShoppingBag, Tag, Ticket, CheckCircle2, MessageCircle, XCircle } from 'lucide-react'
+import { ShoppingBag, Tag, Ticket, CheckCircle2, MessageCircle, XCircle, Banknote, CreditCard } from 'lucide-react'
 import { createOrder } from '@/app/actions/order'
 import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
@@ -11,12 +11,28 @@ import toast from 'react-hot-toast'
 export default function CheckoutBox({ product }: { product: Product }) {
   const [customerName, setCustomerName] = useState('')
   const [customerAddress, setCustomerAddress] = useState('')
+  const [customerPhone, setCustomerPhone] = useState('')
+  const [paymentMethod, setPaymentMethod] = useState('الدفع عند الاستلام')
   const [couponCode, setCouponCode] = useState('')
   const [discount, setDiscount] = useState<number>(0)
   const [loading, setLoading] = useState(false)
+  const [settings, setSettings] = useState({ cod_enabled: true, cod_deposit_required: false, deposit_percentage: 50 })
   const router = useRouter()
 
   const supabase = createClient()
+
+  useEffect(() => {
+    async function fetchSettings() {
+      const { data } = await supabase.from('store_settings').select('*').single()
+      if (data) {
+        setSettings(data)
+        if (!data.cod_enabled && paymentMethod === 'الدفع عند الاستلام') {
+          setPaymentMethod('تحويل بنكي / محافظ إلكترونية')
+        }
+      }
+    }
+    fetchSettings()
+  }, [])
 
   const applyCoupon = async () => {
     if (!couponCode) return
@@ -57,7 +73,15 @@ export default function CheckoutBox({ product }: { product: Product }) {
 
     setLoading(true)
     try {
-      const result = await createOrder(product, couponCode, discount, customerName.trim(), customerAddress.trim())
+      const result = await createOrder(
+        product, 
+        couponCode, 
+        discount, 
+        customerName.trim(), 
+        customerAddress.trim(),
+        customerPhone.trim(),
+        paymentMethod
+      )
       if (result.success && result.orderId) {
         toast.success('تم تسجيل طلبكم بنجاح! جاري تحويلكم للفاتورة...')
         router.push(`/invoice/${result.orderId}`)
@@ -79,14 +103,16 @@ export default function CheckoutBox({ product }: { product: Product }) {
           {product.price ? (
             <>
               <div className="flex flex-col">
-                <span className="text-5xl font-black text-rose-600">
-                  {Number(finalPrice).toFixed(2)}
-                </span>
-                {((product.original_price && product.original_price > product.price) || discount > 0) && (
-                  <span className="text-sm line-through text-zinc-300 font-bold">
-                    {Number(product.original_price || product.price).toFixed(2)} ج.م
+                <div className="flex items-center gap-3">
+                  <span className="text-5xl font-black text-rose-600">
+                    {Number(finalPrice).toFixed(2)}
                   </span>
-                )}
+                  {((product.original_price && product.original_price > product.price) || discount > 0) && (
+                    <span className="text-2xl line-through text-zinc-400 font-bold">
+                      {Number(product.original_price || product.price).toFixed(2)}
+                    </span>
+                  )}
+                </div>
               </div>
               <span className="text-xl font-semibold text-zinc-400">ج.م</span>
             </>
@@ -128,6 +154,18 @@ export default function CheckoutBox({ product }: { product: Product }) {
             />
           </div>
           <div>
+            <label className="block text-sm font-bold text-zinc-700 mb-1">رقم التليفون <span className="text-rose-500">*</span></label>
+            <input
+              type="tel"
+              required
+              value={customerPhone}
+              onChange={(e) => setCustomerPhone(e.target.value)}
+              placeholder="رقم الموبايل للتواصل"
+              className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-100 transition-all text-right"
+              dir="ltr"
+            />
+          </div>
+          <div>
             <label className="block text-sm font-bold text-zinc-700 mb-1">عنوان التوصيل <span className="text-rose-500">*</span></label>
             <input
               type="text"
@@ -137,6 +175,47 @@ export default function CheckoutBox({ product }: { product: Product }) {
               placeholder="المدينة، المنطقة، الشارع، رقم العمارة"
               className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-100 transition-all"
             />
+          </div>
+          <div>
+            <label className="block text-sm font-bold text-zinc-700 mb-2">طريقة الدفع <span className="text-rose-500">*</span></label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <label className={`relative flex rounded-xl border p-4 transition-all ${!settings.cod_enabled ? 'cursor-not-allowed opacity-60 bg-zinc-50 border-zinc-200' : paymentMethod === 'الدفع عند الاستلام' ? 'cursor-pointer border-rose-600 bg-rose-50/50 shadow-sm' : 'cursor-pointer border-zinc-200 hover:border-rose-200 bg-white'}`}>
+                <input type="radio" name="paymentMethod" value="الدفع عند الاستلام" checked={paymentMethod === 'الدفع عند الاستلام'} onChange={(e) => setPaymentMethod(e.target.value)} disabled={!settings.cod_enabled} className="sr-only" />
+                <div className="flex w-full items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${!settings.cod_enabled ? 'bg-zinc-200 text-zinc-400' : paymentMethod === 'الدفع عند الاستلام' ? 'bg-rose-100 text-rose-600' : 'bg-zinc-100 text-zinc-500'}`}>
+                      <Banknote className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <p className={`text-sm font-bold ${!settings.cod_enabled ? 'text-zinc-500 line-through' : paymentMethod === 'الدفع عند الاستلام' ? 'text-rose-900' : 'text-zinc-700'}`}>الدفع عند الاستلام</p>
+                      {settings.cod_enabled && settings.cod_deposit_required && (
+                        <p className="text-[10px] text-rose-600 font-black mt-1 bg-rose-100 px-1.5 py-0.5 rounded inline-block">
+                          مطلوب مقدم {settings.deposit_percentage}% {finalPrice ? `(${Number((finalPrice * settings.deposit_percentage) / 100).toFixed(2)} ج.م)` : ''}
+                        </p>
+                      )}
+                      {!settings.cod_enabled && <p className="text-[10px] text-zinc-500 font-bold mt-1">غير متاح حالياً</p>}
+                    </div>
+                  </div>
+                  {paymentMethod === 'الدفع عند الاستلام' && <CheckCircle2 className="h-5 w-5 text-rose-600" />}
+                </div>
+              </label>
+              
+              <label className={`relative flex cursor-pointer rounded-xl border p-4 transition-all ${paymentMethod === 'تحويل بنكي / محافظ إلكترونية' ? 'border-rose-600 bg-rose-50/50 shadow-sm' : 'border-zinc-200 hover:border-rose-200 bg-white'}`}>
+                <input type="radio" name="paymentMethod" value="تحويل بنكي / محافظ إلكترونية" checked={paymentMethod === 'تحويل بنكي / محافظ إلكترونية'} onChange={(e) => setPaymentMethod(e.target.value)} className="sr-only" />
+                <div className="flex w-full items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${paymentMethod === 'تحويل بنكي / محافظ إلكترونية' ? 'bg-rose-100 text-rose-600' : 'bg-zinc-100 text-zinc-500'}`}>
+                      <CreditCard className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <p className={`text-sm font-bold ${paymentMethod === 'تحويل بنكي / محافظ إلكترونية' ? 'text-rose-900' : 'text-zinc-700'}`}>دفع إلكتروني</p>
+                      <p className="text-[10px] text-zinc-500 font-bold mt-1">إنستا باي / محافظ</p>
+                    </div>
+                  </div>
+                  {paymentMethod === 'تحويل بنكي / محافظ إلكترونية' && <CheckCircle2 className="h-5 w-5 text-rose-600" />}
+                </div>
+              </label>
+            </div>
           </div>
         </div>
       )}
@@ -163,14 +242,27 @@ export default function CheckoutBox({ product }: { product: Product }) {
               {loading ? '...' : 'تطبيق'}
             </button>
           </div>
+          {discount > 0 && (
+            <p className="text-sm font-bold text-emerald-600">
+              تم تفعيل خصم {discount}%
+            </p>
+          )}
         </div>
       )}
 
       {/* CTA */}
       <div className="space-y-3 pt-4 border-t border-rose-100 mt-6">
+        {settings.policies && (
+          <div className="mb-4 rounded-xl bg-zinc-50 border border-zinc-100 p-4">
+            <h4 className="text-xs font-black text-zinc-900 mb-2">سياسات المتجر:</h4>
+            <p className="text-xs text-zinc-500 leading-relaxed whitespace-pre-line font-medium">
+              {settings.policies}
+            </p>
+          </div>
+        )}
         <button 
           onClick={handleOrder} 
-          disabled={loading || product.stock === 0 || !!(product.price && (!customerName.trim() || !customerAddress.trim()))}
+          disabled={loading || product.stock === 0 || !!(product.price && (!customerName.trim() || !customerAddress.trim() || !customerPhone.trim()))}
           className="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-rose-600 h-14 text-lg font-bold text-white transition hover:bg-rose-700 hover:-translate-y-0.5 shadow-lg shadow-rose-200 disabled:opacity-50 disabled:hover:translate-y-0 disabled:bg-zinc-400 disabled:shadow-none"
         >
           {loading ? 'جاري التحضير...' : product.stock === 0 ? 'نفذت الكمية' : 'تأكيد الطلب وإصدار الفاتورة'}

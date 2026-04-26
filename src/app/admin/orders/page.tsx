@@ -56,7 +56,8 @@ export default async function AdminOrders({ searchParams }: { searchParams: Prom
             <thead className="bg-zinc-50 border-b border-zinc-200 text-zinc-500 text-xs uppercase font-semibold">
               <tr>
                 <th className="px-6 py-4 whitespace-nowrap">رقم الفاتورة</th>
-                <th className="px-6 py-4 min-w-[200px]">المنتج / العميل</th>
+                <th className="px-6 py-4 whitespace-nowrap">المنتج / العميل</th>
+                <th className="px-6 py-4 whitespace-nowrap">طريقة الدفع</th>
                 <th className="px-6 py-4 whitespace-nowrap">الكوبون</th>
                 <th className="px-6 py-4 whitespace-nowrap">السعر النهائي</th>
                 <th className="px-6 py-4 whitespace-nowrap">التاريخ</th>
@@ -74,7 +75,19 @@ export default async function AdminOrders({ searchParams }: { searchParams: Prom
                     </td>
                     <td className="px-6 py-4 font-bold text-zinc-900">
                       {order.product_name}
-                      <span className="block text-xs text-zinc-400 font-normal mt-0.5">العميل: <span className="font-bold text-zinc-600">{order.customer_name || 'غير مسجل'}</span></span>
+                      <span className="block text-xs text-zinc-400 font-normal mt-0.5">
+                        العميل: <span className="font-bold text-zinc-600">{order.customer_name || 'غير مسجل'}</span>
+                        {order.customer_phone && <span className="mr-1 inline-block" dir="ltr text-xs text-zinc-500"> - {order.customer_phone}</span>}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      {order.payment_method ? (
+                        <span className={`inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-bold ${order.payment_method === 'الدفع عند الاستلام' ? 'bg-amber-50 text-amber-700' : 'bg-blue-50 text-blue-700'}`}>
+                          {order.payment_method}
+                        </span>
+                      ) : (
+                        <span className="text-zinc-400 text-xs">-</span>
+                      )}
                     </td>
                     <td className="px-6 py-4">
                       {order.coupon_code ? (

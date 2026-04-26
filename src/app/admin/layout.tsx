@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
-import { Flower2, LayoutDashboard, PlusCircle, Ticket, ClipboardList } from 'lucide-react'
+import { Flower2, LayoutDashboard, PlusCircle, Ticket, ClipboardList, Settings } from 'lucide-react'
 import LogoutButton from '@/components/LogoutButton'
 import AdminMobileMenu from '@/components/AdminMobileMenu'
 
@@ -52,6 +52,13 @@ export default async function AdminLayout({ children }: { children: React.ReactN
                   >
                     <ClipboardList className="h-4 w-4" />
                     Orders
+                  </Link>
+                  <Link
+                    href="/admin/settings"
+                    className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-zinc-600 hover:bg-rose-50 hover:text-rose-600 transition-colors"
+                  >
+                    <Settings className="h-4 w-4" />
+                    Settings
                   </Link>
                 </div>
               </div>

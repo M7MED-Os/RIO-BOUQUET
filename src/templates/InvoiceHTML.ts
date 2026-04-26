@@ -1,7 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 
-export function generateInvoiceHTML(order: any, productDescription: string) {
+export function generateInvoiceHTML(order: any, productDescription: string, settings: any = { cod_enabled: true, cod_deposit_required: false }) {
     const shortId = order.id.split('-')[0].toUpperCase()
     const date = new Date(order.created_at).toLocaleDateString('ar-EG')
 
@@ -339,29 +339,49 @@ export function generateInvoiceHTML(order: any, productDescription: string) {
                 ${order.customer_name || 'غير مسجل'}
             </p>
             <p class="info-value-desc">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                <span dir="ltr">${order.customer_phone || 'غير مسجل'}</span>
+            </p>
+            <p class="info-value-desc" style="margin-top: 4px;">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
                 ${order.customer_address || 'عنوان التوصيل غير مسجل'}
             </p>
         </div>
         <div class="info-col border-l">
-            <p class="info-label">تفاصيل الدفع والتواصل</p>
-            <p class="info-value-title no-bold">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                الواتساب: <span class="no-bold">01124417693</span>
+            <p class="info-label">طريقة الدفع المحددة و التواصل</p>
+            <p class="info-value-title no-bold" style="color: var(--rose-600); font-weight: 900 !important; font-size: 15px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                ${order.payment_method || 'غير محدد'}
             </p>
-            <p class="info-value-desc">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-                الدفع عبر الوسائل الإلكترونية المعتمدة أدناه.
+            <p class="info-value-desc" style="margin-top: 8px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                الواتساب: <span class="no-bold">01124417693</span>
             </p>
         </div>
     </div>
 
+    ${order.payment_method === 'الدفع عند الاستلام' && !settings.cod_deposit_required ? `
+    <div class="instr-box" style="background: #f0fdf4; border-color: #bbf7d0;">
+        <p class="instr-title" style="color: #16a34a;">تأكيد الحجز:</p>
+        <p class="instr-text" style="color: #15803d;">
+            سيتم تجهيز طلبك قريباً. الدفع سيكون عند استلام الطلب. يرجى إرسال هذه الفاتورة عبر الواتساب لتأكيد طلبك.
+        </p>
+    </div>
+    ` : order.payment_method === 'الدفع عند الاستلام' && settings.cod_deposit_required ? `
     <div class="instr-box">
         <p class="instr-title">لإتمام الطلب وتأكيد الحجز:</p>
         <p class="instr-text">
-            يرجى إتمام عملية التحويل عبر إحدى الطرق الموضحة بالأسفل، ثم إرسال صورة من إيصال التحويل مع هذه الفاتورة عبر الواتساب للبدء في تجهيز طلبك فوراً.
+            يرجى دفع مقدم بنسبة ${settings.deposit_percentage || 50}% (${Number((order.final_price * (settings.deposit_percentage || 50)) / 100).toFixed(2)} ج.م) عبر إحدى الطرق الموضحة بالأسفل لتأكيد الحجز والبدء في تجهيز طلبك فوراً. سيتم دفع باقي المبلغ عند الاستلام. (يرجى إرسال إيصال التحويل مع هذه الفاتورة عبر الواتساب).
         </p>
     </div>
+    ` : `
+    <div class="instr-box">
+        <p class="instr-title">لإتمام الطلب وتأكيد الحجز:</p>
+        <p class="instr-text">
+            يرجى إتمام عملية الدفع عبر إحدى الطرق الموضحة بالأسفل، ثم إرسال صورة من إيصال التحويل مع هذه الفاتورة عبر الواتساب للبدء في تجهيز طلبك فوراً.
+        </p>
+    </div>
+    `}
 
     <div class="table-header">
         <div class="th-item flex-1">تفاصيل الطلب</div>
@@ -417,6 +437,12 @@ export function generateInvoiceHTML(order: any, productDescription: string) {
     </div>
 
     <footer>
+        ${settings.policies ? `
+        <div style="margin-bottom: 20px; padding: 15px; background: #fafafa; border-radius: 12px; border: 1px dashed #e4e4e7; text-align: right;">
+            <p style="font-size: 11px; font-weight: 800; color: var(--zinc-900); margin-bottom: 4px;">سياسات المتجر:</p>
+            <p style="font-size: 10px; color: var(--zinc-600); line-height: 1.6; white-space: pre-line;">${settings.policies}</p>
+        </div>
+        ` : ''}
         <p class="thanks">شكراً لاختيارك ريو بوكيه!</p>
         <p class="footer-note">هذه الفاتورة معتمدة إلكترونياً من متجر RIO BOUQUET.</p>
     </footer>

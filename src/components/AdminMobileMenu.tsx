@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Menu, X, LayoutDashboard, PlusCircle, Ticket, ClipboardList } from 'lucide-react'
+import { Menu, X, LayoutDashboard, PlusCircle, Ticket, ClipboardList, Settings } from 'lucide-react'
 
 export default function AdminMobileMenu() {
   const [isOpen, setIsOpen] = useState(false)
@@ -57,6 +57,16 @@ export default function AdminMobileMenu() {
               >
                 <ClipboardList className="h-5 w-5" />
                 Orders
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/admin/settings"
+                onClick={() => setIsOpen(false)}
+                className="flex items-center gap-2 rounded-xl bg-zinc-50 px-4 py-3 text-sm font-bold text-zinc-700 hover:bg-rose-50 hover:text-rose-600 transition-colors"
+              >
+                <Settings className="h-5 w-5" />
+                Settings
               </Link>
             </li>
           </ul>

@@ -24,7 +24,9 @@ CREATE TABLE IF NOT EXISTS orders (
     discount_percentage INTEGER DEFAULT 0,
     final_price DECIMAL NOT NULL,
     customer_name TEXT NOT NULL,
+    customer_phone TEXT,
     customer_address TEXT NOT NULL,
+    payment_method TEXT,
     status TEXT DEFAULT 'pending', -- الحالات: pending, confirmed, delivered, cancelled
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -40,6 +42,20 @@ CREATE TABLE IF NOT EXISTS coupons (
     expires_at TIMESTAMPTZ DEFAULT NULL,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- 4. إعدادات المتجر (Store Settings)
+CREATE TABLE IF NOT EXISTS store_settings (
+    id INTEGER PRIMARY KEY DEFAULT 1,
+    cod_enabled BOOLEAN DEFAULT TRUE,
+    cod_deposit_required BOOLEAN DEFAULT FALSE,
+    deposit_percentage INTEGER DEFAULT 50,
+    policies TEXT
+);
+
+-- إدراج الإعدادات الافتراضية
+INSERT INTO store_settings (id, cod_enabled, cod_deposit_required, deposit_percentage, policies) 
+VALUES (1, true, false, 50, 'تطبق الشروط والأحكام الخاصة بالمتجر.')
+ON CONFLICT (id) DO NOTHING;
 
 -- 4. وظيفة لزيادة عداد المشاهدات (Function to increment views)
 CREATE OR REPLACE FUNCTION increment_product_views(product_id UUID)
