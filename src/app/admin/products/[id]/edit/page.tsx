@@ -76,7 +76,13 @@ export default function EditProductPage() {
         </div>
       </div>
 
-      <form action={updateWithId} onSubmit={() => setLoading(true)} className="space-y-6">
+      <form 
+        action={async (formData) => {
+          await updateWithId(formData)
+        }} 
+        onSubmit={() => setLoading(true)} 
+        className="space-y-6"
+      >
         <div className="rounded-2xl bg-white p-8 shadow-sm border border-zinc-200 space-y-6">
           <div className="space-y-2">
             <label className="block text-sm font-bold text-zinc-700">اسم المنتج <span className="text-rose-500">*</span></label>

@@ -29,7 +29,13 @@ export default function NewProductPage() {
         </div>
       </div>
 
-      <form action={createProduct} onSubmit={() => setLoading(true)} className="space-y-6">
+      <form 
+        action={async (formData) => {
+          await createProduct(formData)
+        }} 
+        onSubmit={() => setLoading(true)} 
+        className="space-y-6"
+      >
         <div className="rounded-2xl bg-white p-8 shadow-sm border border-zinc-200 space-y-6">
 
           {/* Name */}
