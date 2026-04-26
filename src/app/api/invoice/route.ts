@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import puppeteer from 'puppeteer'
 import { generateInvoiceHTML } from '@/templates/InvoiceHTML'
 
 export async function GET(request: Request) {
@@ -43,10 +42,25 @@ export async function GET(request: Request) {
   // 4. Generate PDF using Puppeteer
   let browser
   try {
-    browser = await puppeteer.launch({
-      headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
-    })
+    if (process.env.NODE_ENV === 'production') {
+      const puppeteerCore = await import('puppeteer-core')
+      const chromium = (await import('@sparticuz/chromium')).default
+      
+      // Fix for Vercel deployment: use a specific Chromium version if needed,
+      // but sparticuz/chromium usually handles the executablePath correctly.
+      browser = await puppeteerCore.default.launch({
+        args: chromium.args,
+        defaultViewport: chromium.defaultViewport,
+        executablePath: await chromium.executablePath(),
+        headless: chromium.headless,
+      })
+    } else {
+      const puppeteer = await import('puppeteer')
+      browser = await puppeteer.default.launch({
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      })
+    }
     
     const page = await browser.newPage()
     
