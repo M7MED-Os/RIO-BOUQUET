@@ -57,20 +57,28 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
         @media print {
           @page { 
             size: A4;
-            margin: 0 !important;
+            margin: 0mm !important;
           }
-          body { 
+          html, body {
             margin: 0 !important;
             padding: 0 !important;
+            width: 210mm;
+            height: 297mm;
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
           }
           #invoice-document {
+            display: block !important;
+            visibility: visible !important;
             width: 210mm !important;
             height: 297mm !important;
             margin: 0 !important;
             padding: 15mm !important;
             position: relative !important;
+            background: white !important;
+          }
+          .no-print {
+            display: none !important;
           }
           .print-header-bar {
             position: absolute !important;
@@ -260,7 +268,7 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
         <div className="flex justify-between items-start border-b-2 border-zinc-100 pb-8 mb-8 mt-4">
           <div className="flex items-center gap-4">
             <div className="relative h-20 w-20 rounded-2xl overflow-hidden border border-zinc-100">
-              <Image src="/logo.jpg" alt="RIO BOUQUET Logo" fill className="object-cover" />
+              <Image src="/logo.jpg" alt="RIO BOUQUET Logo" fill className="object-cover" priority />
             </div>
             <div>
               <h1 className="text-3xl font-black text-zinc-900 tracking-tight">RIO BOUQUET</h1>
