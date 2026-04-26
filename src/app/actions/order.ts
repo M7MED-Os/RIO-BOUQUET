@@ -41,6 +41,13 @@ export async function createOrder(
     }
   }
 
+  // Pre-order stock check
+  const { data: latestProduct } = await supabase.from('products').select('stock').eq('id', product.id).single()
+  if (latestProduct && latestProduct.stock !== null && latestProduct.stock <= 0) {
+    return { success: false, error: 'عذراً، نفذت الكمية حالياً' }
+  }
+
+
   const { data: order, error } = await supabase.from('orders').insert({
     product_name: product.name,
     product_price: product.price || 0,
@@ -63,12 +70,27 @@ export async function updateOrderStatus(orderId: string, newStatus: string) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { success: false, error: 'Unauthorized' }
 
+  // If status is becoming 'confirmed', decrease stock
+  if (newStatus === 'confirmed') {
+    const { data: order } = await supabase.from('orders').select('product_name').eq('id', orderId).single()
+    if (order) {
+      // Find the product by name (since we don't store product_id in orders yet, which is a flaw, but I'll fix it if needed)
+      // Actually, it's better to find by name for now as per current schema
+      const { data: product } = await supabase.from('products').select('id, stock').eq('name', order.product_name).single()
+      if (product && product.stock !== null && product.stock > 0) {
+        await supabase.from('products').update({ stock: product.stock - 1 }).eq('id', product.id)
+      }
+    }
+  }
+
   const { error } = await supabase.from('orders').update({ status: newStatus }).eq('id', orderId)
   if (error) return { success: false, error: error.message }
 
   revalidatePath('/admin/orders')
+  revalidatePath('/')
   return { success: true }
 }
+
 
 export async function deleteOrder(orderId: string) {
   const supabase = await createClient()

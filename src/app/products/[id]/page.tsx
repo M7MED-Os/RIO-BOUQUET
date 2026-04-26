@@ -5,6 +5,8 @@ import Image from 'next/image'
 import { ArrowLeft, Flower2, ShieldCheck, Truck, HeartHandshake, CheckCircle2 } from 'lucide-react'
 import ImageGallery from '@/components/ImageGallery'
 import CheckoutBox from '@/components/CheckoutBox'
+import CountdownTimer from '@/components/CountdownTimer'
+
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -30,7 +32,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
     .eq('id', id)
     .single()
 
-  if (!product) notFound()
+  if (!product || (!product.is_visible)) notFound()
 
   // Increment views
   await supabase.rpc('increment_product_views', { product_id: id })
@@ -89,9 +91,13 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
           {/* INFO PANEL — first in DOM = RIGHT in RTL ✓ */}
           <div className="flex flex-col">
 
-            <h1 className="text-4xl font-black leading-snug text-zinc-900 sm:text-5xl">
-              {product.name}
-            </h1>
+            <div className="flex flex-wrap items-center gap-3 mb-4">
+              <h1 className="text-4xl font-black leading-snug text-zinc-900 sm:text-5xl">
+                {product.name}
+              </h1>
+              {product.sale_end_date && <CountdownTimer endDate={product.sale_end_date} />}
+            </div>
+
 
 
 
@@ -137,8 +143,24 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
           </div>
 
           {/* IMAGE GALLERY — second in DOM = LEFT in RTL ✓ */}
-          <div className="lg:sticky lg:top-24">
+          <div className="lg:sticky lg:top-24 relative">
             <ImageGallery images={galleryImages} productName={product.name} />
+            
+            {/* Promotion Badges - Moved discount to Left */}
+            <div className="absolute top-4 left-4 z-10">
+              {product.original_price && product.price && product.original_price > product.price && (
+                <div className="bg-rose-600 text-white text-xs font-black px-4 py-2 rounded-full shadow-xl">
+                  خصم {Math.round(((product.original_price - product.price) / product.original_price) * 100)}%
+                </div>
+              )}
+            </div>
+            
+            {product.stock !== null && product.stock <= 5 && product.stock > 0 && (
+              <div className="absolute bottom-4 right-4 bg-amber-500 text-white text-xs font-black px-4 py-2 rounded-full shadow-xl animate-bounce z-10">
+                باقي {product.stock} فقط!
+              </div>
+            )}
+
           </div>
 
         </div>

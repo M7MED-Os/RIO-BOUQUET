@@ -74,19 +74,40 @@ export default function CheckoutBox({ product }: { product: Product }) {
   return (
     <div className="space-y-6">
       {/* Price */}
-      <div className="flex items-baseline gap-3">
-        {product.price ? (
-          <>
-            <span className="text-5xl font-black text-rose-600">
-              {Number(finalPrice).toFixed(2)}
+      <div className="flex flex-col gap-1">
+        <div className="flex items-baseline gap-3">
+          {product.price ? (
+            <>
+              <div className="flex flex-col">
+                <span className="text-5xl font-black text-rose-600">
+                  {Number(finalPrice).toFixed(2)}
+                </span>
+                {((product.original_price && product.original_price > product.price) || discount > 0) && (
+                  <span className="text-sm line-through text-zinc-300 font-bold">
+                    {Number(product.original_price || product.price).toFixed(2)} ج.م
+                  </span>
+                )}
+              </div>
+              <span className="text-xl font-semibold text-zinc-400">ج.م</span>
+            </>
+          ) : (
+            <span className="text-2xl font-bold text-zinc-400">السعر عند التواصل</span>
+          )}
+        </div>
+
+        {/* Stock Status */}
+        {product.stock !== null ? (
+          <div className="mt-2 flex items-center gap-2">
+            <div className={`h-2 w-2 rounded-full ${product.stock > 5 ? 'bg-green-500' : product.stock > 0 ? 'bg-amber-500 animate-pulse' : 'bg-rose-500'}`} />
+            <span className={`text-xs font-bold ${product.stock > 5 ? 'text-zinc-500' : product.stock > 0 ? 'text-amber-600' : 'text-rose-600'}`}>
+              {product.stock > 0 ? `متوفر في المخزون: ${product.stock}` : 'غير متوفر حالياً'}
             </span>
-            <span className="text-xl font-semibold text-zinc-400">ج.م</span>
-            {discount > 0 && (
-              <span className="text-lg line-through text-zinc-300 mr-2">{Number(product.price).toFixed(2)} ج.م</span>
-            )}
-          </>
+          </div>
         ) : (
-          <span className="text-2xl font-bold text-zinc-400">السعر عند التواصل</span>
+          <div className="mt-2 flex items-center gap-2">
+            <div className="h-2 w-2 rounded-full bg-green-500" />
+            <span className="text-xs font-bold text-zinc-500">متوفر في المخزون</span>
+          </div>
         )}
       </div>
 
@@ -149,10 +170,10 @@ export default function CheckoutBox({ product }: { product: Product }) {
       <div className="space-y-3 pt-4 border-t border-rose-100 mt-6">
         <button 
           onClick={handleOrder} 
-          disabled={loading || !!(product.price && (!customerName.trim() || !customerAddress.trim()))}
-          className="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-rose-600 h-14 text-lg font-bold text-white transition hover:bg-rose-700 hover:-translate-y-0.5 shadow-lg shadow-rose-200 disabled:opacity-50 disabled:hover:translate-y-0"
+          disabled={loading || product.stock === 0 || !!(product.price && (!customerName.trim() || !customerAddress.trim()))}
+          className="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-rose-600 h-14 text-lg font-bold text-white transition hover:bg-rose-700 hover:-translate-y-0.5 shadow-lg shadow-rose-200 disabled:opacity-50 disabled:hover:translate-y-0 disabled:bg-zinc-400 disabled:shadow-none"
         >
-          {loading ? 'جاري التحضير...' : 'تأكيد الطلب وإصدار الفاتورة'}
+          {loading ? 'جاري التحضير...' : product.stock === 0 ? 'نفذت الكمية' : 'تأكيد الطلب وإصدار الفاتورة'}
         </button>
         <p className="text-center text-xs text-zinc-400">
           سيتم إنشاء فاتورة إلكترونية لطلبك مع خيارات الدفع المتاحة

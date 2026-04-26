@@ -6,6 +6,8 @@ import { Flower2, MapPin, Phone, Star, Truck, ShieldCheck, HeartHandshake } from
 
 import SearchFilter from '@/components/SearchFilter'
 import MobileMenu from '@/components/MobileMenu'
+import CountdownTimer from '@/components/CountdownTimer'
+
 
 export default async function HomePage({
   searchParams,
@@ -15,7 +17,7 @@ export default async function HomePage({
   const supabase = await createClient()
   const { q, category } = await searchParams
 
-  let query = supabase.from('products').select('*').order('created_at', { ascending: false })
+  let query = supabase.from('products').select('*').eq('is_visible', true).order('created_at', { ascending: false })
 
   if (q && typeof q === 'string') {
     query = query.ilike('name', `%${q}%`)
@@ -177,6 +179,22 @@ export default async function HomePage({
                         <Flower2 className="h-16 w-16 text-rose-200" />
                       </div>
                     )}
+                    
+                    {/* Discount Badge - Moved to Top Left */}
+                    {product.original_price && product.price && product.original_price > product.price && (
+                      <div className="absolute top-4 left-4 bg-rose-600 text-white text-[10px] font-black px-2 py-1 rounded-full shadow-lg z-10">
+                        خصم {Math.round(((product.original_price - product.price) / product.original_price) * 100)}%
+                      </div>
+                    )}
+
+                    {/* Stock Warning */}
+                    {product.stock !== null && (
+                      <div className={`absolute bottom-4 right-4 text-white text-[10px] font-bold px-2 py-1 rounded-lg shadow-md z-10 ${product.stock > 0 ? 'bg-zinc-900/80' : 'bg-rose-600'}`}>
+                        {product.stock > 0 ? `متوفر: ${product.stock}` : 'نفذت الكمية'}
+                      </div>
+                    )}
+
+
                     <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                   </Link>
 
@@ -198,12 +216,23 @@ export default async function HomePage({
 
                     <div className="mt-auto pt-5">
                       {product.price && (
-                        <div className="text-xl font-black text-rose-600 mb-4">
-                          {Number(product.price).toFixed(2)} ج.م
+                        <div className="flex items-center justify-between mb-4">
+                          <div className="flex flex-col">
+                            <span className="text-xl font-black text-rose-600">
+                              {Number(product.price).toFixed(2)} ج.م
+                            </span>
+                            {product.original_price && product.original_price > product.price && (
+                              <span className="text-xs text-zinc-400 line-through font-bold">
+                                {Number(product.original_price).toFixed(2)} ج.م
+                              </span>
+                            )}
+                          </div>
+                          {product.sale_end_date && <CountdownTimer endDate={product.sale_end_date} />}
                         </div>
                       )}
                       <div className="flex gap-2">
                         <WhatsAppButton product={product} className="flex-[2] h-11 rounded-xl text-xs" />
+
                         <Link
                           href={`/products/${product.id}`}
                           className="flex flex-1 items-center justify-center h-11 rounded-xl border-2 border-rose-100 text-xs font-bold text-rose-600 transition hover:bg-rose-50"

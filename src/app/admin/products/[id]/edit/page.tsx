@@ -114,20 +114,76 @@ export default function EditProductPage() {
             />
           </div>
 
-          <div className="space-y-2">
-            <label className="block text-sm font-bold text-zinc-700">السعر بالجنيه (اختياري)</label>
-            <div className="relative">
-              <input
-                name="price"
-                type="number"
-                step="0.01"
-                min="0"
-                defaultValue={product.price ?? ''}
-                className="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 pr-16 text-sm text-right text-zinc-900 placeholder:text-zinc-400 outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-100 transition-all"
-              />
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xs font-bold text-zinc-400">EGP</span>
+          {/* Price & Offers */}
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <label className="block text-sm font-bold text-zinc-700">السعر الحالي</label>
+              <div className="relative">
+                <input
+                  name="price"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  defaultValue={product.price ?? ''}
+                  className="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm text-right text-zinc-900 placeholder:text-zinc-400 outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-100 transition-all"
+                />
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xs font-bold text-zinc-400">EGP</span>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <label className="block text-sm font-bold text-zinc-700">السعر قبل الخصم (اختياري)</label>
+              <div className="relative">
+                <input
+                  name="original_price"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  defaultValue={product.original_price ?? ''}
+                  className="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm text-right text-zinc-900 placeholder:text-zinc-400 outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-100 transition-all"
+                />
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xs font-bold text-zinc-400">EGP</span>
+              </div>
             </div>
           </div>
+
+          {/* Stock & Sale Duration */}
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <label className="block text-sm font-bold text-zinc-700">الكمية المتاحة (المخزون)</label>
+              <input
+                name="stock"
+                type="number"
+                min="0"
+                defaultValue={product.stock ?? ''}
+                placeholder="اتركه فارغاً لمخزون غير محدود"
+                className="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm text-right text-zinc-900 placeholder:text-zinc-400 outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-100 transition-all"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="block text-sm font-bold text-zinc-700">نهاية العرض (اختياري)</label>
+              <input
+                name="sale_end_date"
+                type="datetime-local"
+                defaultValue={product.sale_end_date ? new Date(product.sale_end_date).toISOString().slice(0, 16) : ''}
+                className="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm text-right text-zinc-900 placeholder:text-zinc-400 outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-100 transition-all"
+              />
+            </div>
+          </div>
+
+          {/* Visibility */}
+          <div className="flex items-center gap-3 rounded-xl bg-zinc-50 p-4 border border-zinc-200">
+            <input
+              type="checkbox"
+              name="is_visible"
+              id="is_visible"
+              defaultChecked={product.is_visible}
+              className="h-5 w-5 rounded border-zinc-300 text-rose-600 focus:ring-rose-500"
+            />
+            <label htmlFor="is_visible" className="text-sm font-bold text-zinc-700 cursor-pointer">
+              عرض المنتج في المتجر (مرئي للعملاء)
+            </label>
+          </div>
+
 
           <div className="space-y-2">
             <label className="block text-sm font-bold text-zinc-700">صور المنتج <span className="text-zinc-400 font-normal">(حتى 6 صور)</span></label>

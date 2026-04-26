@@ -18,13 +18,22 @@ export async function createProduct(formData: FormData) {
 
   const category = formData.get('category') as string || 'أخرى'
 
+  const stock = formData.get('stock') ? parseInt(formData.get('stock') as string) : null
+  const original_price = formData.get('original_price') ? parseFloat(formData.get('original_price') as string) : null
+  const sale_end_date = formData.get('sale_end_date') as string || null
+  const is_visible = formData.get('is_visible') === 'on'
+
   const { error } = await supabase.from('products').insert({
     name,
     description: description || null,
     price,
+    original_price,
     image_url,
     images,
     category,
+    stock,
+    sale_end_date,
+    is_visible,
   })
 
   if (error) {
@@ -51,9 +60,25 @@ export async function updateProduct(id: string, formData: FormData) {
 
   const category = formData.get('category') as string || 'أخرى'
 
+  const stock = formData.get('stock') ? parseInt(formData.get('stock') as string) : null
+  const original_price = formData.get('original_price') ? parseFloat(formData.get('original_price') as string) : null
+  const sale_end_date = formData.get('sale_end_date') as string || null
+  const is_visible = formData.get('is_visible') === 'on'
+
   const { error } = await supabase
     .from('products')
-    .update({ name, description: description || null, price, image_url, images, category })
+    .update({ 
+      name, 
+      description: description || null, 
+      price, 
+      original_price,
+      image_url, 
+      images, 
+      category,
+      stock,
+      sale_end_date,
+      is_visible,
+    })
     .eq('id', id)
 
   if (error) {
@@ -96,6 +121,25 @@ export async function deleteProduct(id: string) {
     console.error('Error deleting product:', error)
     return { error: error.message }
   }
+  revalidatePath('/admin/dashboard')
+  revalidatePath('/')
+}
+
+export async function toggleProductVisibility(id: string, is_visible: boolean) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'غير مصرح لك بالقيام بهذا الإجراء' }
+
+  const { error } = await supabase
+    .from('products')
+    .update({ is_visible })
+    .eq('id', id)
+
+  if (error) {
+    console.error('Error toggling visibility:', error)
+    return { error: error.message }
+  }
+
   revalidatePath('/admin/dashboard')
   revalidatePath('/')
 }

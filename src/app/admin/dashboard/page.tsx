@@ -3,6 +3,8 @@ import Link from 'next/link'
 import { Plus, Package, Edit, ExternalLink, Flower2, LayoutDashboard, Eye, Tag } from 'lucide-react'
 import Image from 'next/image'
 import DeleteProductButton from '@/components/DeleteProductButton'
+import VisibilityToggle from '@/components/VisibilityToggle'
+
 
 export default async function AdminDashboard() {
   const supabase = await createClient()
@@ -66,8 +68,8 @@ export default async function AdminDashboard() {
                 <th className="px-6 py-4">المنتج</th>
                 <th className="px-6 py-4">التصنيف</th>
                 <th className="px-6 py-4">السعر</th>
+                <th className="px-6 py-4">المخزون</th>
                 <th className="px-6 py-4">المشاهدات</th>
-                <th className="px-6 py-4">تاريخ الإضافة</th>
                 <th className="px-6 py-4 text-left">الإجراءات</th>
               </tr>
             </thead>
@@ -109,14 +111,28 @@ export default async function AdminDashboard() {
                         <span className="text-zinc-400 text-xs">غير محدد</span>
                       )}
                     </td>
+                    <td className="px-6 py-4">
+                      {product.stock !== null ? (
+                        <span className={`inline-flex items-center gap-1 rounded-lg px-3 py-1 text-xs font-bold border ${
+                          product.stock > 5 
+                            ? 'bg-green-50 text-green-700 border-green-100' 
+                            : product.stock > 0 
+                              ? 'bg-amber-50 text-amber-700 border-amber-100' 
+                              : 'bg-rose-50 text-rose-700 border-rose-100'
+                        }`}>
+                          {product.stock} قطع
+                        </span>
+                      ) : (
+                        <span className="text-zinc-400 text-xs">∞ مفتوح</span>
+                      )}
+                    </td>
                     <td className="px-6 py-4 font-bold text-zinc-600">
                       {product.views_count || 0}
                     </td>
-                    <td className="px-6 py-4 text-zinc-500 text-xs">
-                      {new Date(product.created_at).toLocaleDateString('ar-SA')}
-                    </td>
+
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-1">
+                        <VisibilityToggle id={product.id} initialValue={product.is_visible} />
                         <Link
                           href={`/products/${product.id}`}
                           title="معاينة المنتج على الموقع"
