@@ -95,9 +95,16 @@ export async function GET(request: Request) {
       },
     })
 
-  } catch (err) {
+  } catch (err: any) {
     console.error('PDF Generation Error:', err)
-    if (browser) await browser.close()
-    return NextResponse.json({ error: 'Failed to generate PDF' }, { status: 500 })
+    if (browser) {
+      try {
+        await browser.close()
+      } catch (e) {}
+    }
+    return NextResponse.json({ 
+      error: 'Failed to generate PDF', 
+      details: err?.message || err?.toString() || 'Unknown error'
+    }, { status: 500 })
   }
 }
