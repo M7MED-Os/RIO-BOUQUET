@@ -1,7 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import Image from 'next/image'
 import Link from 'next/link'
-import WhatsAppButton from '@/components/WhatsAppButton'
 import { Flower2, MapPin, Phone, Star, Truck, ShieldCheck, HeartHandshake } from 'lucide-react'
 
 import SearchFilter from '@/components/SearchFilter'
@@ -231,13 +230,11 @@ export default async function HomePage({
                         </div>
                       )}
                       <div className="flex gap-2">
-                        <WhatsAppButton product={product} className="flex-[2] h-11 rounded-xl text-xs" />
-
                         <Link
                           href={`/products/${product.id}`}
-                          className="flex flex-1 items-center justify-center h-11 rounded-xl border-2 border-rose-100 text-xs font-bold text-rose-600 transition hover:bg-rose-50"
+                          className="flex w-full items-center justify-center h-11 rounded-xl bg-rose-600 text-sm font-bold text-white transition hover:bg-rose-700 shadow-sm shadow-rose-200"
                         >
-                          المعاينة
+                          اطلب دلوقتي
                         </Link>
                       </div>
                     </div>

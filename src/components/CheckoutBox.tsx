@@ -16,7 +16,7 @@ export default function CheckoutBox({ product }: { product: Product }) {
   const [couponCode, setCouponCode] = useState('')
   const [discount, setDiscount] = useState<number>(0)
   const [loading, setLoading] = useState(false)
-  const [settings, setSettings] = useState({ cod_enabled: true, cod_deposit_required: false, deposit_percentage: 50 })
+  const [settings, setSettings] = useState<{ cod_enabled: boolean; cod_deposit_required: boolean; deposit_percentage: number; policies?: string }>({ cod_enabled: true, cod_deposit_required: false, deposit_percentage: 50 })
   const router = useRouter()
 
   const supabase = createClient()
